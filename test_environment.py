@@ -43,15 +43,13 @@ def main(window: curses.window) -> None:
             if len(active) > 0:
                 active = []
             else:
-                buffer.pop()
-        elif c == curses.KEY_LEFT:
-            if len(active) > 0:
-                active = []
-            else:
-                buffer.pop()
+                try:
+                    buffer.pop()
+                except IndexError:
+                    pass
         else:
             active.append(c)
-        window.clear()
+        window.erase()
         window.addstr(buffer_to_string(buffer, active))
 
 
