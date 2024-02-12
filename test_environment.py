@@ -1,26 +1,80 @@
 import curses
 from difflib import ndiff
-from dataclasses import dataclass, field
 
 
-@dataclass
+class Spellcheck:
+    def __init__(self) -> None:
+        self.dictionary = self.__read_word_list()
+
+    def __levenshtein_distance(
+        self,
+        str1: str,
+        str2: str,
+    ) -> int:
+        counter = {"+": 0, "-": 0}
+        distance = 0
+        for edit_code, *_ in ndiff(str1, str2):
+            if edit_code == " ":
+                distance += max(counter.values())
+                counter = {"+": 0, "-": 0}
+            else:
+                counter[edit_code] += 1
+        distance += max(counter.values())
+        return distance
+
+    def __similarity(self, str1: str, str2: str) -> float:
+        return 1 - (self.__levenshtein_distance(str1, str2) / min(len(str1), len(str2)))
+
+    def __read_word_list(self) -> list[str]:
+        with open("big_wordlist.txt") as f:
+            return f.read().split()
+
+    def get_match(self, word: list[int]) -> list[int]:
+        converted_word = "".join([chr(c) for c in word])
+        if converted_word in self.dictionary:
+            return word
+        matches: list[tuple[float, str]] = []
+        for potential in self.dictionary:
+            if abs(len(word) - len(potential)) <= 2:
+                dist = self.__similarity(converted_word, potential)
+                if dist > 0.5:
+                    matches.append((dist, potential))
+        if len(matches) > 0:
+            matches = sorted(matches, key=lambda x: x[0])
+            str_word = matches[0][1]
+            return [ord(c) for c in str_word]
+        else:
+            return word
+
+
 class Text:
-    buffer: list[int] = field(default_factory=list)
-    active: list[int] = field(default_factory=list)
+    def __init__(self) -> None:
+        self.autocorrect = Spellcheck()
+        self.buffer: list[int] = []
+        self.active: list[int] = []
+        self.nearest: list[int] = []
 
     def add_char(self, c: int) -> None:
         if c == ord(" "):
-            for i in self.active:
-                self.buffer.append(i)
+            if len(self.nearest) > 0:
+                for i in self.nearest:
+                    self.buffer.append(i)
+            else:
+                for i in self.active:
+                    self.buffer.append(i)
             self.buffer.append(c)
             self.active = []
+            self.nearest = []
         else:
             self.active.append(c)
+            self.nearest = self.autocorrect.get_match(self.active)
 
     def del_char(self) -> None:
         if len(self.active) > 0:
             try:
                 self.active.pop()
+                if len(self.active) > 0:
+                    self.nearest = self.autocorrect.get_match(self.active)
             except IndexError:
                 pass
         else:
@@ -32,6 +86,7 @@ class Text:
     def del_word(self) -> None:
         if len(self.active) > 0:
             self.active = []
+            self.nearest = []
         else:
             try:
                 last_char = 0
@@ -44,7 +99,7 @@ class Text:
         return self.buffer
 
     def get_dimmed_text(self) -> list[int]:
-        return self.active
+        return self.nearest
 
 
 class Terminal:
@@ -53,7 +108,6 @@ class Terminal:
         self.window: curses.window
         self._stopped = False
 
-        
     @staticmethod
     def __init_curses() -> None:
         curses.raw()
@@ -88,40 +142,6 @@ class Terminal:
     def __ctrl(c: int) -> int:
         """Returns the version of char with control pressed."""
         return (c) & 0x1F
-
-
-def levenshtein_distance(
-    str1,
-    str2,
-):
-    counter = {"+": 0, "-": 0}
-    distance = 0
-    for edit_code, *_ in ndiff(str1, str2):
-        if edit_code == " ":
-            distance += max(counter.values())
-            counter = {"+": 0, "-": 0}
-        else:
-            counter[edit_code] += 1
-    distance += max(counter.values())
-    return distance
-
-
-def similarity(str1, str2):
-    return 1 - (levenshtein_distance(str1, str2) / min(len(str1), len(str2)))
-
-
-def read_word_list() -> list[str]:
-    with open("wordlist.txt") as f:
-        return f.read().split()
-
-
-def potential_matches(word, dictionary):
-    matches: list[tuple[float, str]] = []
-    for potential in dictionary:
-        dist = similarity(word, potential)
-        if dist > 0.5:
-            matches.append((dist, potential))
-    return sorted(matches, key=lambda x: x[0])
 
 
 if __name__ == "__main__":
