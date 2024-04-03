@@ -50,3 +50,7 @@ Using a dictionary for everything:
 }
 
 Would work but takes quite a bit of space, would need to check how much actual space it takes.
+
+# Training data
+
+[1 billion word corpus](https://www.statmt.org/lm-benchmark/)
