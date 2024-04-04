@@ -2,55 +2,18 @@
 
 This tool is a terminal based autocorrect prototype. The goal is to test out different methods of setting up autocorrection, with the goal of typing faster and learning about spelling checking / correction.
 
-# Options
-
-1. No correction, just typing in words, explaining how to set up text input in the terminal.
-2. Only checking if the word exists, maybe the word get's a different color when it's not in a list?
-3. Edit distance based optimization, looking at the edit distance to words when the input is not in the dictionary
-4. Edit distance + word frequency, allow more common words to score higher
-5. Context aware: Add a markov chain that uses the previous word to have likely next words, include word frequency for the combinations
+The prototype runs on curses, and needs the `windows-curses` library on windows. 
 
 # Structure
 
-A terminal editor that you can swap out different methods of checking spelling, maybe the logical level is to make an interface for a text buffer, and just swap out entire text buffers. 
+There are some exercises you can make in the mini_projects. The folder 1_no_auto_correct, contains a blank template to have basic terminal text editor functionality, you can use this to build spelling correct into. The folder 2_single_word has autocorrect based on the edit distance to a word in a dictionary. Lastly the folder 3_context_aware contains the setup to use a markov model to improve the autocorrection.
 
+# Spelling Correct
+
+A good [wordlist](https://github.com/first20hours/google-10000-english/blob/master/google-10000-english.txt) to use to check words against.
 
 # Markov Chain
 
-For the markov chain lookup speed and storage size need to be balanced. This requires a good way to find words, but also not use strings for everything to avoid duplicating words. 
-Steps in looking up corrections:
+The markov chain can be trained on any corpus, an example of a pre tokenized dataset is the [1 billion word corpus](https://www.statmt.org/lm-benchmark/).
+If you want to use a different text, it can easily be tokenized with the [NLTK Tokenizer package](https://www.nltk.org/api/nltk.tokenize.html), this functionality is not build in, but can easily be added. Look into `3_context_aware/buffer/markov_model.py` in the Markov class the `.split()` in the `_load_corpus` method can be replaced with NLTK `word_tokenize`.
 
-
-1. Check if current word is in potential words
-
-
-## Examples
-
-Sample sentence: all the time new things
-
-Option 1:
-
-Using a list for the words, using the indexes in a dictionary.
-
-words = ["all", "the", "time", "new", "things"]
-bigram = {0: [1], 1: [2, 3, 4], 2: [3]}
-
-Relatively space efficient, but the problem is that looking up words is slow since the the list can not be sorted.
-
-Option 2:
-
-Using a dictionary for everything:
-
-{
-    "all": ["the"],
-    "the": ["time", "new", "things"],
-    "time": ["new"],
-    "new": ["things"],
-    "things": [],
-}
-
-Would work but takes quite a bit of space, would need to check how much actual space it takes.
-
-# Training data
-
-[1 billion word corpus](https://www.statmt.org/lm-benchmark/)

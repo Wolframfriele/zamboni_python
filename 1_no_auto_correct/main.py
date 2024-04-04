@@ -1,6 +1,6 @@
 """
 This contains the code to interact with the terminal.
-It relies on the cursus module. The text itself is stored
+It relies on the curses module. The text itself is stored
 in the buffer.
 """
 

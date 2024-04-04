@@ -34,18 +34,17 @@ class SpellingCorrection:
                 next_words = self.markov.get_next(previous_word)
             else:
                 next_words = self.markov.get_next(".")
-            if next_words:
-                if word in next_words:
-                    return word
-                matches: list[tuple[float, str]] = []
-                for potential in next_words.keys():
-                    if abs(len(word) - len(potential)) <= 2:
-                        dist = self.__similarity_score(word, potential)
-                        if dist > 0.5:
-                            matches.append((dist, potential))
-                if len(matches) > 0:
-                    matches = sorted(matches, key=lambda x: x[0])
-                    return matches[0][1]
+            if word in next_words:
+                return word
+            matches: list[tuple[float, str]] = []
+            for potential in next_words:
+                if abs(len(word) - len(potential)) <= 2:
+                    dist = self.__similarity_score(word, potential)
+                    if dist > 0.5:
+                        matches.append((dist, potential))
+            if len(matches) > 0:
+                matches = sorted(matches, key=lambda x: x[0])
+                return matches[0][1]
         return word
 
 

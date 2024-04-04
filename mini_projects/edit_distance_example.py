@@ -6,6 +6,9 @@ how the algorithm determines the edit distance.
 
 
 def print_word(word: str) -> None:
+    """
+    Helper function to print the top row containing the word.
+    """
     print("    ", end="")
     for char in word:
         print(f", {char}", end="")
@@ -15,10 +18,9 @@ def print_word(word: str) -> None:
 def edit_distance(str1: str, str2: str) -> int:
     print_word(str1)
     current = [i for i in range(len(str1) + 1)]
-    previous = current.copy()
     print(f"  {current}")
     for i in range(1, len(str2) + 1):
-        previous = current
+        previous = current.copy()
         current[0] = i
         for j in range(1, len(str1) + 1):
             if str1[j - 1] != str2[i - 1]:
@@ -34,8 +36,8 @@ def edit_distance(str1: str, str2: str) -> int:
 
 
 if __name__ == "__main__":
-    word1 = "ruust"
-    word2 = "rust"
+    word1 = "pythen"
+    word2 = "python"
 
-    edit_distance(word1, word2)
-    print("")
+    result = edit_distance(word1, word2)
+    assert result == 1
