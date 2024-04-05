@@ -28,7 +28,10 @@ class SpellingCorrection:
             return f.read().split()
 
     def __similarity_score(self, str1: str, str2: str) -> float:
-        return 1 - (self.edit_distance(str1, str2) / min(len(str1), len(str2)))
+        distance = self.edit_distance(str1, str2)
+        if str1[0] == str2[0]:
+            distance -= 1
+        return distance
 
     def get_match(self, word: str) -> str:
         if word:
@@ -38,10 +41,9 @@ class SpellingCorrection:
             for potential in self.dictionary:
                 if abs(len(word) - len(potential)) <= 2:
                     dist = self.__similarity_score(word, potential)
-                    if dist > 0.5:
-                        matches.append((dist, potential))
+                    matches.append((dist, potential))
             if len(matches) > 0:
-                matches = sorted(matches, key=lambda x: x[0])
+                matches = sorted(matches, key=lambda x: x[0], reverse=False)
                 return matches[0][1]
         return word
 

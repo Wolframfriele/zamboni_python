@@ -18,6 +18,7 @@ class Text:
             while start - 1 > 0:
                 if (
                     self.buffer[start - 1] == ord(" ")
+                    or self.buffer[start] == ord(".")
                     or self.buffer[start] == ord("?")
                     or self.buffer[start] == ord("!")
                     or self.buffer[start] == ord(":")
@@ -80,3 +81,4 @@ class Text:
 
     def get_dimmed_text(self) -> list[int]:
         return self.active
+

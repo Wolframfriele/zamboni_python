@@ -15,6 +15,7 @@ def print_word(word: str) -> None:
     print("")
 
 
+
 def edit_distance(str1: str, str2: str) -> int:
     print_word(str1)
     current = [i for i in range(len(str1) + 1)]
